@@ -1,7 +1,7 @@
 package aufgabe1;
 
 import java.util.concurrent.TimeUnit;
-import aufgabe.util.Tools;
+import util.Tools;
 
 public class Main {
 
