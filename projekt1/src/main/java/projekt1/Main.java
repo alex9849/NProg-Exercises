@@ -7,8 +7,11 @@ public class Main {
     Cabin cabin = new Cabin();
     Door groundFloorDoor = new Door();
     Door firstFloorDoor = new Door();
+    new Thread(cabin).start();
+    new Thread(groundFloorDoor).start();
+    new Thread(firstFloorDoor).start();
 
-    Controller controller = new Controller();
+    Controller controller = new Controller(cabin, groundFloorDoor, firstFloorDoor);
     printState(controller, cabin, groundFloorDoor, firstFloorDoor);
 
     controller.processEvent(InputEvent.up);

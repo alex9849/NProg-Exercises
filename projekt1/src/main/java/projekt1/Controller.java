@@ -1,13 +1,29 @@
 package projekt1;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Exchanger;
+
 // Main-Controller, der alle Eingaben entgegen nimmt
 // und die anderen Controller koordiniert
 public class Controller {
   private volatile State state;
+  private final Exchanger<Cabin.State> cabinExchanger;
+  private final Exchanger<Door.State> groundDoorExchanger;
+  private final Exchanger<Door.State> firstFloorDorExchanger;
+  private final CyclicBarrier cabinBarrier;
+  private final CyclicBarrier groundDoorBarrier;
+  private final CyclicBarrier firstFloorDoorBarrier;
 
-  public Controller() {
+  public Controller(Cabin cabin, Door groundDoor, Door firstDoor) {
     // Init state
     this.state = State.onGroundFloorAndClose;
+    this.cabinExchanger = cabin.getExchanger();
+    this.cabinBarrier = cabin.getBarrier();
+    this.groundDoorExchanger = groundDoor.getExchanger();
+    this.groundDoorBarrier = groundDoor.getBarrier();
+    this.firstFloorDorExchanger = firstDoor.getExchanger();
+    this.firstFloorDoorBarrier = firstDoor.getBarrier();
   }
 
   public State getState() {
@@ -38,7 +54,13 @@ public class Controller {
   private void processUpEvent(InputEvent event) throws InterruptedException {
     switch (this.state) {
       case onGroundFloorAndClose:
+        cabinExchanger.exchange(Cabin.State.onFirstFloor);
         this.state = State.onFirstFloorAndClose;
+        try {
+          cabinBarrier.await();
+        } catch (BrokenBarrierException e) {
+          e.printStackTrace();
+        }
         break;
       case onGroundFloorAndOpen:
       case onFirstFloorAndClose:
@@ -55,7 +77,13 @@ public class Controller {
       case onGroundFloorAndOpen:
         break;
       case onFirstFloorAndClose:
+        cabinExchanger.exchange(Cabin.State.onGroundFloor);
         this.state = State.onGroundFloorAndClose;
+        try {
+          cabinBarrier.await();
+        } catch (BrokenBarrierException e) {
+          e.printStackTrace();
+        }
         break;
       case onFirstFloorAndOpen:
         break;
@@ -67,12 +95,24 @@ public class Controller {
   private void processOpenEvent(InputEvent event) throws InterruptedException {
     switch (this.state) {
       case onGroundFloorAndClose:
+        groundDoorExchanger.exchange(Door.State.doorIsOpen);
         this.state = State.onGroundFloorAndOpen;
+        try {
+          groundDoorBarrier.await();
+        } catch (BrokenBarrierException e) {
+          e.printStackTrace();
+        }
         break;
       case onGroundFloorAndOpen:
         break;
       case onFirstFloorAndClose:
+        firstFloorDorExchanger.exchange(Door.State.doorIsOpen);
         this.state = State.onFirstFloorAndOpen;
+        try {
+          firstFloorDoorBarrier.await();
+        } catch (BrokenBarrierException e) {
+          e.printStackTrace();
+        }
       case onFirstFloorAndOpen:
         break;
       default:
@@ -85,12 +125,24 @@ public class Controller {
       case onGroundFloorAndClose:
         break;
       case onGroundFloorAndOpen:
+        groundDoorExchanger.exchange(Door.State.doorIsClosed);
         this.state = State.onGroundFloorAndClose;
+        try {
+          groundDoorBarrier.await();
+        } catch (BrokenBarrierException e) {
+          e.printStackTrace();
+        }
         break;
       case onFirstFloorAndClose:
         break;
       case onFirstFloorAndOpen:
+        firstFloorDorExchanger.exchange(Door.State.doorIsClosed);
         this.state = State.onFirstFloorAndClose;
+        try {
+          firstFloorDoorBarrier.await();
+        } catch (BrokenBarrierException e) {
+          e.printStackTrace();
+        }
         break;
       default:
         System.err.println("Error processing event !");
