@@ -13,8 +13,8 @@ public class MainA3
   {
     final AtomicBoolean isRunning = new AtomicBoolean(true);
     final Person person = new NonThreadSafePerson("aaaaa", "aaaaa");
-    // final Person person = new ThreadSafePerson_WriteReadLock("aaaaa", "aaaaa");
-    // final Person person = new ThreadSafePerson_OptimisticLock("aaaaa", "aaaaa");
+    //final Person person = new ThreadSafePerson_WriteReadLock("aaaaa", "aaaaa");
+    //final Person person = new ThreadSafePerson_OptimisticLock("aaaaa", "aaaaa");
     
     // Verändert die Attribute
     Runnable writer = () -> {
