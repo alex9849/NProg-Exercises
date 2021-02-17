@@ -7,12 +7,16 @@ import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
     private final static int THREAD_COUNT = 10;
+    private final static AtomicInteger iteration = new AtomicInteger();
 
     public static void main(String... args) {
-        CyclicBarrier barrier = new CyclicBarrier(THREAD_COUNT);
+        CyclicBarrier barrier = new CyclicBarrier(THREAD_COUNT, () -> {
+            System.out.println("Iteration: " + iteration.incrementAndGet());
+        });
         AtomicBoolean patternFound = new AtomicBoolean();
         List<Worker> workers = new ArrayList<>();
         for (int i = 0; i < THREAD_COUNT; i++) {
