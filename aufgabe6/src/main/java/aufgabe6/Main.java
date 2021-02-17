@@ -3,6 +3,8 @@ package aufgabe6;
 
 import util.Tools;
 
+import java.util.concurrent.ForkJoinPool;
+
 public class Main {
 
   public static void main(String[] args) {
@@ -21,7 +23,20 @@ public class Main {
     IntMatrix recursive = multRecursive(matrix1, matrix2, 6);
     System.out.println("Dauer " + (System.currentTimeMillis() - start));
 
-    System.out.println(IntMatrix.equals(matrix, recursive));
+    System.out.println("forkJoin");
+    start = System.currentTimeMillis();
+    IntMatrix forkJoin = forkJoin(matrix1, matrix2);
+    System.out.println("Dauer " + (System.currentTimeMillis() - start));
+
+    System.out.println(IntMatrix.equals(matrix, forkJoin));
+  }
+
+  static IntMatrix forkJoin(IntMatrix a, IntMatrix b) {
+    MatrixMultiplier matrixMultiplier = new MatrixMultiplier(a, b, 6);
+    int threads = Runtime.getRuntime().availableProcessors();
+    ForkJoinPool executor = new ForkJoinPool(threads);
+    executor.execute(matrixMultiplier);
+    return matrixMultiplier.join();
   }
 
   static IntMatrix multRecursive(IntMatrix a, IntMatrix b, int recursionDepth) {
