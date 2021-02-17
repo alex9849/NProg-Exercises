@@ -14,7 +14,7 @@ public class Main {
     // Initialisierung
     List<String> strings = new ArrayList<>();
     for (int i = 0; i < 100_000; i++) {
-      strings.add(Tools.getRandomString(10));
+      strings.add(Tools.getRandomString(2));
     }
 
     // Verarbeitung der Liste
@@ -28,6 +28,9 @@ public class Main {
     // Variante mit einem Downstream-Collector (geschachtelte Collectoren)
 //    Map<String, Long> stringMapCount = strings.stream().parallel()
 //                  .collect( Collectors.groupingBy( str -> str.substring(0, 1), Collectors.counting() ) );
+
+    stringMapCount = strings.stream().parallel()
+            .collect(new CountByGroupCollector<>());
 
 
     // Ausgabe der Liste
