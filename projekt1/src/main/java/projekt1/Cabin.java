@@ -7,7 +7,7 @@ import java.util.concurrent.Exchanger;
 // Controller für die Fahrstuhlkabine
 // Steuert die Motoren, die den Fahrstuhl vertikal bewegen
 public class Cabin implements Runnable {
-  private final Exchanger<State> exchanger;
+  private final Exchanger<Controller.State> exchanger;
   private final CyclicBarrier barrier;
   private State state;
 
@@ -17,7 +17,7 @@ public class Cabin implements Runnable {
     this.barrier = new CyclicBarrier(2);
   }
 
-  Exchanger<State> getExchanger() {
+  Exchanger<Controller.State> getExchanger() {
     return exchanger;
   }
 
@@ -33,7 +33,12 @@ public class Cabin implements Runnable {
   public void run() {
     while (true) {
       try {
-        this.state = exchanger.exchange(null);
+        Controller.State cState = exchanger.exchange(null);
+        if (cState == Controller.State.onFirstFloorAndClose) {
+          this.state = State.onFirstFloor;
+        } else if (cState == Controller.State.onGroundFloorAndClose) {
+          this.state = State.onGroundFloor;
+        }
         barrier.await();
       } catch (InterruptedException | BrokenBarrierException e) {
         e.printStackTrace();

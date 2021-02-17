@@ -5,8 +5,8 @@ public class Main {
 
   public static void main(String[] args) throws InterruptedException {
     Cabin cabin = new Cabin();
-    Door groundFloorDoor = new Door();
-    Door firstFloorDoor = new Door();
+    Door groundFloorDoor = new Door(true);
+    Door firstFloorDoor = new Door(false);
     new Thread(cabin).start();
     new Thread(groundFloorDoor).start();
     new Thread(firstFloorDoor).start();

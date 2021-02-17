@@ -8,9 +8,9 @@ import java.util.concurrent.Exchanger;
 // und die anderen Controller koordiniert
 public class Controller {
   private volatile State state;
-  private final Exchanger<Cabin.State> cabinExchanger;
-  private final Exchanger<Door.State> groundDoorExchanger;
-  private final Exchanger<Door.State> firstFloorDorExchanger;
+  private final Exchanger<State> cabinExchanger;
+  private final Exchanger<State> groundDoorExchanger;
+  private final Exchanger<State> firstFloorDorExchanger;
   private final CyclicBarrier cabinBarrier;
   private final CyclicBarrier groundDoorBarrier;
   private final CyclicBarrier firstFloorDoorBarrier;
@@ -54,8 +54,8 @@ public class Controller {
   private void processUpEvent(InputEvent event) throws InterruptedException {
     switch (this.state) {
       case onGroundFloorAndClose:
-        cabinExchanger.exchange(Cabin.State.onFirstFloor);
         this.state = State.onFirstFloorAndClose;
+        cabinExchanger.exchange(this.state);
         try {
           cabinBarrier.await();
         } catch (BrokenBarrierException e) {
@@ -77,8 +77,8 @@ public class Controller {
       case onGroundFloorAndOpen:
         break;
       case onFirstFloorAndClose:
-        cabinExchanger.exchange(Cabin.State.onGroundFloor);
         this.state = State.onGroundFloorAndClose;
+        cabinExchanger.exchange(this.state);
         try {
           cabinBarrier.await();
         } catch (BrokenBarrierException e) {
@@ -95,8 +95,8 @@ public class Controller {
   private void processOpenEvent(InputEvent event) throws InterruptedException {
     switch (this.state) {
       case onGroundFloorAndClose:
-        groundDoorExchanger.exchange(Door.State.doorIsOpen);
         this.state = State.onGroundFloorAndOpen;
+        groundDoorExchanger.exchange(this.state);
         try {
           groundDoorBarrier.await();
         } catch (BrokenBarrierException e) {
@@ -106,8 +106,8 @@ public class Controller {
       case onGroundFloorAndOpen:
         break;
       case onFirstFloorAndClose:
-        firstFloorDorExchanger.exchange(Door.State.doorIsOpen);
         this.state = State.onFirstFloorAndOpen;
+        firstFloorDorExchanger.exchange(this.state);
         try {
           firstFloorDoorBarrier.await();
         } catch (BrokenBarrierException e) {
@@ -125,8 +125,8 @@ public class Controller {
       case onGroundFloorAndClose:
         break;
       case onGroundFloorAndOpen:
-        groundDoorExchanger.exchange(Door.State.doorIsClosed);
         this.state = State.onGroundFloorAndClose;
+        groundDoorExchanger.exchange(this.state);
         try {
           groundDoorBarrier.await();
         } catch (BrokenBarrierException e) {
@@ -136,8 +136,8 @@ public class Controller {
       case onFirstFloorAndClose:
         break;
       case onFirstFloorAndOpen:
-        firstFloorDorExchanger.exchange(Door.State.doorIsClosed);
         this.state = State.onFirstFloorAndClose;
+        firstFloorDorExchanger.exchange(this.state);
         try {
           firstFloorDoorBarrier.await();
         } catch (BrokenBarrierException e) {
@@ -149,7 +149,7 @@ public class Controller {
     }
   }
 
-  private enum State {
+  public enum State {
     onGroundFloorAndClose, onGroundFloorAndOpen, onFirstFloorAndClose, onFirstFloorAndOpen
   }
 }
