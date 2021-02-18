@@ -3,12 +3,13 @@ package projekt2;
 import util.Tools;
 
 import java.util.Arrays;
+import java.util.concurrent.ForkJoinPool;
 
 public class Main {
 
   public static void main(String[] args) {
-    int[] array1 = Tools.gerRandomIntArray(170, 0, 1000);
-    int[] array2 = Tools.gerRandomIntArray(150, 0, 1000);
+    int[] array1 = Tools.gerRandomIntArray(200000, 0, 1000);
+    int[] array2 = Tools.gerRandomIntArray(200000, 0, 1000);
 
     int[] controlArray = new int[array1.length + array2.length];
     System.arraycopy(array1, 0, controlArray, 0, array1.length);
@@ -23,13 +24,28 @@ public class Main {
 
     // Teste, ob merge korrekt war
     Arrays.sort(controlArray);
-    if (Arrays.compare(controlArray, mergeArray) != 0) {
+   /* if (Arrays.compare(controlArray, mergeArray) != 0) {
       System.out.println("Merge error");
       System.out.println(Arrays.toString(controlArray));
       System.out.println(Arrays.toString(mergeArray));
+    }*/
+
+    int[] parallelMergeArray = parallelMerge(array1, array2);
+    if (Arrays.compare(controlArray, parallelMergeArray) != 0) {
+      System.out.println("Merge error");
+      System.out.println(Arrays.toString(controlArray));
+      System.out.println(Arrays.toString(parallelMergeArray));
     }
 
     System.out.println("done");
+  }
+
+  public static int[] parallelMerge(int[] array1, int[] array2) {
+    int threads = Runtime.getRuntime().availableProcessors();
+    ForkJoinPool pool = new ForkJoinPool(threads);
+    ArrayMerger arrayMerger = new ArrayMerger(array1, array2);
+    pool.execute(arrayMerger);
+    return arrayMerger.join();
   }
 
   public static int[] merge(int[] sortedArray1, int[] sortedArray2) {
