@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.concurrent.RecursiveTask;
 
 public class ArrayMerger extends RecursiveTask<int[]> {
-    private final int THRESHOLD = 100;
+    //I played a bit with the threshold. This value seems optimal
+    private final int THRESHOLD = 2000;
     private final int[] largerArr;
     private final int[] smallerArr;
     private final int largerArrStart;

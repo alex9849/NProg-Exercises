@@ -8,29 +8,32 @@ import java.util.concurrent.ForkJoinPool;
 public class Main {
 
   public static void main(String[] args) {
-    int[] array1 = Tools.gerRandomIntArray(200000, 0, 1000);
-    int[] array2 = Tools.gerRandomIntArray(200000, 0, 1000);
+    //Try 273_000_000
+    int[] array1 = Tools.gerRandomIntArray(20_000, 0, 1000);
+    //Try 173_000_000 (Maybe Java will run out of heap-space)
+    int[] array2 = Tools.gerRandomIntArray(20_000, 0, 1000);
 
     int[] controlArray = new int[array1.length + array2.length];
     System.arraycopy(array1, 0, controlArray, 0, array1.length);
     System.arraycopy(array2, 0, controlArray, array1.length, array2.length);
 
+    System.out.println("Pre-sorting merge");
+    System.out.println("Sorting array1");
     Arrays.sort(array1);
+    System.out.println("Sorting array2");
     Arrays.sort(array2);
-
-
-    System.out.println("Merge two sorted arrays");
-    int[] mergeArray = merge(array1, array2);
-
-    // Teste, ob merge korrekt war
+    System.out.println("Sorting controlArray");
     Arrays.sort(controlArray);
-   /* if (Arrays.compare(controlArray, mergeArray) != 0) {
-      System.out.println("Merge error");
-      System.out.println(Arrays.toString(controlArray));
-      System.out.println(Arrays.toString(mergeArray));
-    }*/
 
+    System.out.println("Sequential merge");
+    long startTime = System.currentTimeMillis();
+    int[] mergeArray = merge(array1, array2);
+    System.out.println("Time needed: " + (System.currentTimeMillis() - startTime) + "ms");
+
+    startTime = System.currentTimeMillis();
+    System.out.println("Parallel merge");
     int[] parallelMergeArray = parallelMerge(array1, array2);
+    System.out.println("Time needed: " + (System.currentTimeMillis() - startTime) + "ms");
     if (Arrays.compare(controlArray, parallelMergeArray) != 0) {
       System.out.println("Merge error");
       System.out.println(Arrays.toString(controlArray));
@@ -42,7 +45,7 @@ public class Main {
 
   public static int[] parallelMerge(int[] array1, int[] array2) {
     int threads = Runtime.getRuntime().availableProcessors();
-    ForkJoinPool pool = new ForkJoinPool(threads);
+    ForkJoinPool pool = new ForkJoinPool();
     ArrayMerger arrayMerger = new ArrayMerger(array1, array2);
     pool.execute(arrayMerger);
     return arrayMerger.join();
