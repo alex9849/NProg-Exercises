@@ -5,7 +5,7 @@ import java.util.concurrent.RecursiveTask;
 
 public class ArrayMerger extends RecursiveTask<int[]> {
     //I played a bit with the threshold. This value seems optimal
-    private final int THRESHOLD = 2000;
+    private final int THRESHOLD = 4000;
     private final int[] largerArr;
     private final int[] smallerArr;
     private final int largerArrStart;
@@ -42,7 +42,7 @@ public class ArrayMerger extends RecursiveTask<int[]> {
 
     @Override
     protected int[] compute() {
-        if (largerArrLength < THRESHOLD) {
+        if (largerArrLength + smallerArrLength < THRESHOLD) {
             mergeArr();
             return result;
         }
